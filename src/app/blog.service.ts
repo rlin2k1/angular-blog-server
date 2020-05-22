@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-
+import { Post } from './post';
 @Injectable({
   providedIn: 'root'
 })
@@ -7,9 +7,17 @@ export class BlogService {
 
   private blogUrl = 'api';  // URL to web api
 
-  draft: Post // Saving a past post
+  httpGetOptions = {
+    method: 'GET',
+    credentials: 'include'
+  };
 
-  constructor() { }
+  draft: Post // Saving a past post
+  username: string;
+
+  constructor() {
+    this.username = this.getUsername();
+  }
 
   jsonToPostArray(json) {
     let result: Post[] = [];
@@ -23,11 +31,20 @@ export class BlogService {
   fetchPosts(username: string): Promise<Post[]> {
     const url = `${this.blogUrl}/${username}`;
 
-    fetch(url)
-    .then((res) => res.json())
-    .then((json) => {
-      let res = this.jsonToPostArray(json);
-      return res;
+    return fetch(url, {
+      method: 'GET',
+      credentials: 'include'
+    })
+    .then((response) => response.json())
+    .then(response => {     
+      let posts: Post[] = [];
+      response.forEach(post => {
+        let pt = JSON.parse(JSON.stringify(post));
+        pt.created = new Date(pt.created);
+        console.log(pt.created);
+        posts.push(pt);
+      })
+      return posts;
     })
     .catch();
   }
@@ -35,12 +52,15 @@ export class BlogService {
   getPost(username: string, postid: number): Promise<Post> {
     const url = `${this.blogUrl}/${username}/${postid}`;
 
-    fetch(url)
-    .then((res) => res.json())
-    .then((json) => {
-      let res = this.jsonToPostArray(json);
-      return res;
+    return fetch(url, {
+      method: 'GET',
+      credentials: 'include'
     })
+    .then((response) => response.json())
+    .then(response => {     
+        let newPost = new Post(response);
+        return newPost;
+      })
     .catch();
   }
 
@@ -48,37 +68,67 @@ export class BlogService {
     // Need to calculate updated postid using post.postid
     const url = `${this.blogUrl}/${username}/${post.postid}`;
 
-    fetch(url)
-    .then((res) => res.json())
-    .then((json) => {
-      let res = this.jsonToPostArray(json);
-      return res;
+    return fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({title: post.title, body: post.body})
     })
-    .catch();
+    .then((response) => {
+      if(response.status === 201) {
+        // success
+        return;
+      } else {
+        alert('Status: ' + response.status.toString() + ', Error creating post at server!');
+        // this.router.navigate(['/']);
+        return;
+      }
+    })
   }
 
   updatePost(username: string, post: Post): Promise<void> {
     const url = `${this.blogUrl}/${username}/${post.postid}`;
 
-    fetch(url)
-    .then((res) => res.json())
-    .then((json) => {
-      let res = this.jsonToPostArray(json);
-      return res;
+    return fetch(url, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({title: post.title, body: post.body})
     })
-    .catch();
+    .then((response) => {
+      if(response.status === 200) {
+        // success
+        return;
+      } else {
+        alert('Status: ' + response.status.toString() + ', Error updating post at server!');
+        // this.router.navigate(['/' , 'edit', post.postid]);
+        return;
+      }
+    })
   }
 
   deletePost(username: string, postid: number): Promise<void> {
     const url = `${this.blogUrl}/${username}/${postid}`;
     
-    fetch(url)
-    .then((res) => res.json())
-    .then((json) => {
-      let res = this.jsonToPostArray(json);
-      return res;
+    return fetch(url, {
+      method: 'DELETE',
+      credentials: 'include',
     })
-    .catch();
+    .then(response => {
+      if(response.status === 204) {
+        // Success
+        return;
+      } else {
+        alert('Status: ' + response.status.toString() + ', Error deleting post at server!');
+        // DONE: ROUTE TO '/' here
+        // this.router.navigate(['/']);
+        return;
+      }
+    });
   }
 
   setCurrentDraft(post: Post): void {
@@ -89,20 +139,23 @@ export class BlogService {
   getCurrentDraft(): Post {
     return this.draft;
   }
+
+  getUsername(): string {
+    if(!document.cookie) return null;
+    let token = parseJWT(document.cookie);
+    let username = token.usr;
+    if(username) {
+      return username;
+    } else {
+      return null;
+    }
+  }
 }
 
-export class Post {
-  postid: number;
-  created: Date;
-  modified: Date;
-  title: string;
-  body: string;
-
-  constructor(jsonObject) {
-    this.postid = jsonObject.postid;
-    this.created = jsonObject.created;
-    this.modified = jsonObject.modified;
-    this.title = jsonObject.title;
-    this.body = jsonObject.body;
-  }
+// Helper function to extract username from JWT
+function parseJWT(token)
+{
+    let base64Url = token.split('.')[1];
+    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
 }
