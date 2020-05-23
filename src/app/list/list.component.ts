@@ -33,6 +33,7 @@ export class ListComponent implements OnInit {
     // Sets current draft
     this.blogService.setCurrentDraft(post);
     // Opens the edit view
+    router.navigate([`/edit/{$post.id}`])
   }
 
 }
