@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Post } from '../post';
 import { BlogService } from '../blog.service'
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-list',
@@ -10,7 +11,7 @@ import { BlogService } from '../blog.service'
 export class ListComponent implements OnInit {
   posts: Post[];
 
-  constructor(private blogService: BlogService) {
+  constructor(private blogService: BlogService, public router: Router) {
   }
 
   ngOnInit(): void {
@@ -33,7 +34,6 @@ export class ListComponent implements OnInit {
     // Sets current draft
     this.blogService.setCurrentDraft(post);
     // Opens the edit view
-    router.navigate([`/edit/{$post.id}`])
+    this.router.navigate([`/edit/{$post.id}`])
   }
-
 }
