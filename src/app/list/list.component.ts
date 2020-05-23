@@ -28,12 +28,13 @@ export class ListComponent implements OnInit {
     // Sets current draft
     //this.blogService.setCurrentDraft(post);
     // Opens the edit view
+    //this.router.navigate([`/edit/${post.postid}`])
   }
 
   setCurrentDraft(post: Post): void {
     // Sets current draft
     this.blogService.setCurrentDraft(post);
     // Opens the edit view
-    this.router.navigate([`/edit/{$post.id}`])
+    this.router.navigate([`/edit/${post.postid}`])
   }
 }
