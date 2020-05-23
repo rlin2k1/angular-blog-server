@@ -9,17 +9,30 @@ import { BlogService } from '../blog.service'
 })
 export class ListComponent implements OnInit {
   posts: Post[];
-  username: string;
 
   constructor(private blogService: BlogService) {
   }
 
   ngOnInit(): void {
-    this.username = this.blogService.getUsername();
-    this.blogService.fetchPosts(this.username)
+    let username = this.blogService.getUsername();
+    this.blogService.fetchPosts(username)
     .then (posts => {
       this.posts = posts;
     })
+  }
+
+  newPost(): void {
+    // Creates a new empty post
+
+    // Sets current draft
+    //this.blogService.setCurrentDraft(post);
+    // Opens the edit view
+  }
+
+  setCurrentDraft(post: Post): void {
+    // Sets current draft
+    this.blogService.setCurrentDraft(post);
+    // Opens the edit view
   }
 
 }
