@@ -70,7 +70,21 @@ export class EditComponent implements OnInit {
     } else {
       this.blogService.updatePost(this.username, this.post);
     }
-    this.getPost(); // Get updated modified time
+    const postid = +this.route.snapshot.paramMap.get('id');
+
+    this.blogService.getPost(this.username, this.post.postid) // Get updated modified time
+      .then (post => {
+        if(post !== undefined) { // No post available
+          this.post = post;
+        } else {
+          let newPost = this.blogService.getCurrentDraft();
+          if (newPost.postid === postid) {
+            this.post = newPost;
+          } else {
+            this.router.navigate(['/']);
+          }
+        }
+      });
   }
 
   preview(): void {
