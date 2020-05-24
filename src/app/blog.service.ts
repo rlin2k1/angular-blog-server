@@ -5,7 +5,7 @@ import { Post } from './post';
 })
 export class BlogService {
 
-  private blogUrl = 'api';  // URL to web api
+  private blogUrl = '/api';  // URL to web api
 
   draft: Post // Saving a past post
 
@@ -22,7 +22,7 @@ export class BlogService {
 
   fetchPosts(username: string): Promise<Post[]> {
     const url = `${this.blogUrl}/${username}`;
-
+    console.log(url);
     return fetch(url, {
       method: 'GET',
       credentials: 'include'
