@@ -22,7 +22,7 @@ export class BlogService {
 
   fetchPosts(username: string): Promise<Post[]> {
     const url = `${this.blogUrl}/${username}`;
-    console.log(url);
+    
     return fetch(url, {
       method: 'GET',
       credentials: 'include'
@@ -51,12 +51,12 @@ export class BlogService {
       credentials: 'include'
     })
     .then(response => {
-      console.log("REACHED")
+      
       if(response.status === 404) {
-        console.log("REACHEDdd")
+        
         throw new Error ("Undefined")
       }
-      console.log("REACHfdsfsdfED")
+      
       return response.json();
     })
     .then(response => {   
