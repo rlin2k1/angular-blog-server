@@ -29,7 +29,10 @@ export class EditComponent implements OnInit {
   getPost(): void {
     const postid = +this.route.snapshot.paramMap.get('id');
 
-    this.blogService.getPost(this.username, postid)
+    this.post = this.blogService.getCurrentDraft();
+
+    if (this.post === undefined || this.post.postid !== postid) {
+      this.blogService.getPost(this.username, postid)
       .then (post => {
         if(post !== undefined) { // No post available
           this.post = post;
@@ -41,9 +44,9 @@ export class EditComponent implements OnInit {
             this.router.navigate(['/']);
           }
         }
-        this.blogService.setCurrentDraft(this.post); // Save the post for Preview Display
       })
       .catch(error => this.router.navigate(['/']));
+    }
 
     // if (draft === undefined) {
     //   this.blogService.getPost(username, postid)
@@ -71,6 +74,7 @@ export class EditComponent implements OnInit {
   }
 
   preview(): void {
+    this.blogService.setCurrentDraft(this.post); // Save the post for Preview Display
     this.router.navigate([`/preview/${this.post.postid}`])
   }
 
