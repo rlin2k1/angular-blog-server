@@ -7,25 +7,17 @@ export class BlogService {
 
   private blogUrl = 'api';  // URL to web api
 
-  httpGetOptions = {
-    method: 'GET',
-    credentials: 'include'
-  };
-
   draft: Post // Saving a past post
-  username: string;
 
-  constructor() {
-    this.username = this.getUsername();
+  constructor() {}
+
+  genPostid(posts: Post[]): number {
+    return posts.length > 0 ? Math.max(...posts.map(post => post.postid)) + 1 : 1;
   }
 
-  jsonToPostArray(json) {
-    let result: Post[] = [];
-
-    for(var i in json)
-      result.push(new Post(i));
-
-    return result;
+  callback = null;
+  subscribe(callback) {
+    this.callback = callback;
   }
 
   fetchPosts(username: string): Promise<Post[]> {
@@ -36,17 +28,19 @@ export class BlogService {
       credentials: 'include'
     })
     .then((response) => response.json())
-    .then(response => {     
+    .then(response => {
       let posts: Post[] = [];
+
       response.forEach(post => {
-        let pt = JSON.parse(JSON.stringify(post));
-        pt.created = new Date(pt.created);
-        console.log(pt.created);
-        posts.push(pt);
+        let parsedPost = JSON.parse(JSON.stringify(post));
+        posts.push(parsedPost);
       })
       return posts;
     })
-    .catch();
+    .catch(error => {
+      this.handleError<Post[]>(error, 'fetchPosts');
+      return null;
+    });
   }
 
   getPost(username: string, postid: number): Promise<Post> {
@@ -56,12 +50,28 @@ export class BlogService {
       method: 'GET',
       credentials: 'include'
     })
-    .then((response) => response.json())
-    .then(response => {     
-        let newPost = new Post(response);
-        return newPost;
+    .then(response => {
+      console.log("REACHED")
+      if(response.status === 404) {
+        console.log("REACHEDdd")
+        throw new Error ("Undefined")
+      }
+      console.log("REACHfdsfsdfED")
+      return response.json();
+    })
+    .then(response => {   
+        let post = new Post();
+        post.postid = response.postid;
+        post.created = response.created;
+        post.modified = response.modified;
+        post.title = response.title;
+        post.body = response.body;
+        return post;
       })
-    .catch();
+    .catch(error => {
+      //this.handleError<Post>(error, 'getPost');
+      return undefined;
+    });
   }
 
   newPost(username: string, post: Post): Promise<void> {
@@ -78,7 +88,14 @@ export class BlogService {
     })
     .then((response) => {
       if(response.status === 201) {
-        // success
+        // success - let the list component know
+        if (this.callback){
+          let username = this.getUsername();
+          this.fetchPosts(username)
+          .then (posts => {
+            this.callback(posts);
+          });
+        }
         return;
       } else {
         alert('Status: ' + response.status.toString() + ', Error creating post at server!');
@@ -86,6 +103,10 @@ export class BlogService {
         return;
       }
     })
+    .catch(error => {
+      this.handleError<Post>(error, 'newPost');
+      return;
+    });
   }
 
   updatePost(username: string, post: Post): Promise<void> {
@@ -101,7 +122,14 @@ export class BlogService {
     })
     .then((response) => {
       if(response.status === 200) {
-        // success
+        // success - let the list component know
+        if (this.callback){
+          let username = this.getUsername();
+          this.fetchPosts(username)
+          .then (posts => {
+            this.callback(posts);
+          });
+        }
         return;
       } else {
         alert('Status: ' + response.status.toString() + ', Error updating post at server!');
@@ -109,6 +137,10 @@ export class BlogService {
         return;
       }
     })
+    .catch(error => {
+      this.handleError<Post>(error, 'newPost');
+      return;
+    });
   }
 
   deletePost(username: string, postid: number): Promise<void> {
@@ -120,7 +152,14 @@ export class BlogService {
     })
     .then(response => {
       if(response.status === 204) {
-        // Success
+        // success - let the list component know
+        if (this.callback){
+          let username = this.getUsername();
+          this.fetchPosts(username)
+          .then (posts => {
+            this.callback(posts);
+          });
+        }
         return;
       } else {
         alert('Status: ' + response.status.toString() + ', Error deleting post at server!');
@@ -128,6 +167,10 @@ export class BlogService {
         // this.router.navigate(['/']);
         return;
       }
+    })
+    .catch(error => {
+      this.handleError<Post>(error, 'newPost');
+      return;
     });
   }
 
@@ -149,6 +192,18 @@ export class BlogService {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Handle Http operation that failed.
+   * Let the app continue.
+   * @param operation - name of the operation that failed
+   * @param result - optional value to return as the observable result
+   */
+  private handleError<T>(error: any, operation = 'operation') {
+      console.error(error); // log to console instead
+
+      console.log(`${operation} failed: ${error.message}`);
   }
 }
 

@@ -1,16 +1,21 @@
-<h1>Edit Post</h1>
-<div>
-    <label>Title:</label>
-    <input [(ngModel)]="post.title" placeholder="title"/>
-</div>
-<div>
-    <label>Body:
-        <textarea [(ngModel)]="post.body" placeholder="body"></textarea>
-    </label>
-</div>
-<h4>Last Modified: {{post.modified | date:'M/d/yyyy h:mm:ss a'}}</h4>
-<div>
-    <button (click)="delete()">Delete</button>
-    <button (click)="save()">Save</button>
-    <button (click)="preview()">Preview</button>
+<div *ngIf="post">
+    <h2>Edit Post</h2>
+    <div>
+        <label>Title:
+            <input [(ngModel)]="post.title" placeholder="title">
+        </label>
+    </div>
+    <div>
+        <label>Body:
+            <textarea [(ngModel)]="post.body" placeholder="body"></textarea>
+        </label>
+    </div>
+    <div *ngIf="post.modified">
+        <h4>Last Modified: {{post.modified | date:'M/d/yyyy h:mm:ss a'}}</h4>
+    </div>
+    <div>
+        <button (click)="delete()">Delete</button>
+        <button (click)="save()">Save</button>
+        <button (click)="preview()">Preview</button>
+    </div>
 </div>
