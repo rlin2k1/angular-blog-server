@@ -3,7 +3,6 @@ import { Post } from '../post';
 import { BlogService } from '../blog.service'
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-edit',
@@ -15,13 +14,13 @@ export class EditComponent implements OnInit {
   post: Post;
   username: string;
 
-  constructor(private blogService: BlogService, private route: ActivatedRoute, private location: Location, public router: Router) {
+  constructor(private blogService: BlogService, private route: ActivatedRoute, public router: Router) {
   }
 
   ngOnInit(): void {
     this.username = this.blogService.getUsername();
     // Need to make sure there is a current draft. Current draft is for saving the changes.
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe( () => {
       this.getPost();
     });
   }
@@ -47,15 +46,6 @@ export class EditComponent implements OnInit {
       })
       .catch(error => this.router.navigate(['/']));
     }
-
-    // if (draft === undefined) {
-    //   this.blogService.getPost(username, postid)
-    //   .then (post => {
-    //     this.post = post;
-    //   });
-    // } else {
-    //   this.post = draft;
-    // }
   }
 
   delete(): void {
@@ -91,5 +81,4 @@ export class EditComponent implements OnInit {
     this.blogService.setCurrentDraft(this.post); // Save the post for Preview Display
     this.router.navigate([`/preview/${this.post.postid}`])
   }
-
 }

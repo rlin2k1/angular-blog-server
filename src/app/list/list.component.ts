@@ -17,7 +17,7 @@ export class ListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe( () => {
       this.getBlogs();
     });
     this.blogService.subscribe( posts => { this.posts = posts; }); // Subscribe whenever the blog list is changed
@@ -32,18 +32,17 @@ export class ListComponent implements OnInit {
   }
 
   newPost(): void {
-    // Creates a new empty post
     // Gets highest Postid
-    // Sets current draft
-    // Opens the edit view
-    //this.router.navigate([`/edit/${post.postid}`])
     let postid = this.blogService.genPostid(this.posts);
+    // Creates a new empty post
     let post = new Post();
     post.postid = postid;
     post.title = '';
     post.body = '';
     post.created = undefined;
+    // Sets current draft
     this.blogService.setCurrentDraft(post); // Save the post for Preview Display
+    // Opens the edit view
     this.router.navigate([`/edit/${postid}`])
   }
 

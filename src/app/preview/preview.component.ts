@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-// import { Post } from '../post';
 import { BlogService } from '../blog.service'
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-import { Location } from '@angular/common';
 import { Parser, HtmlRenderer } from 'commonmark';
 
 @Component({
@@ -48,7 +46,7 @@ export class PreviewComponent implements OnInit {
           this.router.navigate(['/']);
         }
       })
-      .catch(error => this.router.navigate(['/']));
+      .catch( () => this.router.navigate(['/']));
     }
   }
 
